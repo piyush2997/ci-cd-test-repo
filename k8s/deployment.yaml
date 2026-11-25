@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ci-cd-test-repo
+  labels:
+    app: ci-cd-test-repo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ci-cd-test-repo
+  template:
+    metadata:
+      labels:
+        app: ci-cd-test-repo
+    spec:
+      containers:
+        - name: ci-cd-test-repo
+          image: ci-cd-test-repo:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: "3000"
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ci-cd-test-repo
+spec:
+  selector:
+    app: ci-cd-test-repo
+  ports:
+    - port: 3000
+      targetPort: 3000
